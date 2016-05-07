@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>拼图小游戏</title>
+    <!-- <link rel="stylesheet" href="../shared/css/base.css" /> -->
+    <style type="text/css">
+     .content-box{
+      margin:0 auto;
+      border:solid 1px #0022f1;
+      width:404px;
+      height:404px;
+      position:relative;
+      background-color:#000000;
+     
+     }
+    .content-box span{
+      display:block;
+      border:solid 1px #ff1100;
+      width:132px;
+      height:132px;
+      position:absolute;
+      font-size: 11px;
+      color: #000000;
+     }
+    .cell0-0,.cell0-1,.cell0-2{top:0px;}
+    .cell1-0,.cell1-1,.cell1-2{top:134px;}
+    .cell2-0,.cell2-1,.cell2-2{top:266px;}
+
+    .cell0-0,.cell1-0,.cell2-0{left:0px;}
+    .cell0-1,.cell1-1,.cell2-1{left:134px;}
+    .cell0-2,.cell1-2,.cell2-2{left:266px;}
+    .success-show{
+      position:absolute;
+      width:400px;
+      height:132px;
+      top:130px;
+      left:2px;
+      z-index: 1;
+      background-color: #00f000;
+      font-size: 100px;
+      text-align: center;
+    }
+    </style>
+  </head>
+  <body>
+    
+    <div id="container">
+ 
+    </div>
+    
+    <script src="https://facebook.github.io/react/js/react.js"></script>
+    <script src="https://facebook.github.io/react/js/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.24/browser.min.js"></script>
+    <script type="text/babel">
+    var initCells = [
+    {x:0,y:0,val:'1'},
+    {x:0,y:1,val:'2'},
+    {x:0,y:2,val:'3'},
+    {x:1,y:0,val:'4'},
+    {x:1,y:1,val:'5'},
+    {x:1,y:2,val:'6'},
+    {x:2,y:0,val:'7'},
+    {x:2,y:1,val:'8'},
+    {x:2,y:2,val:'9'}
+    ];  var initCells2 = [
+    {x:0,y:0,val:'1'},
+    {x:0,y:1,val:'2'},
+    {x:0,y:2,val:'3'},
+    {x:1,y:0,val:'4'},
+    {x:1,y:1,val:'5'},
+    {x:1,y:2,val:'6'},
+    {x:2,y:0,val:'7'},
+    {x:2,y:1,val:'8'},
+    {x:2,y:2,val:'9'}
+    ];   
+      
+ 
+      var ContentBox = React.createClass({
+          getInitialState: function () {
+              return { cells: initCells };
+           },
+           componentDidMount: function () {
+              var valArray=[];
+              this.state.cells.forEach(function(item){
+                 valArray.push(item.val);
+              })
+              valArray.sort(function(){
+                 return .5-Math.random();
+              });
+              valArray.forEach(function(val,i){
+                initCells[i].val = val;
+              }) 
+              setTimeout(function(){
+              this.setState({cells: initCells});
+              }.bind(this),3000);
+           },
+           componentDidUpdate: function () {
+             var ss =  this.state.cells.sort(function(a,b){
+                 return a.val-b.val>0;
+              })
+              var flag = ss.every(function(item,i){
+                  return (item.x==initCells2[i].x && item.y==initCells2[i].y && item.val==initCells2[i].val) ;
+              });
+             if (flag){
+               alert("你真棒！");
+             }
+              
+           },
+           handleCellClick :function(x,y){
+             var cells = this.state.cells;
+             var clickCell = null;
+             var clickCellIndex = null;
+             var emptyCellIndex = null;
+             var emptyCell = null;
+             cells.forEach(function(item,index){
+                 if((item.x == x) && (item.y == y)){
+                    clickCell = item;
+                    clickCellIndex = index;
+                 }
+                 if(item.val == '9'){
+                   emptyCell = item;
+                   emptyCellIndex = index;
+                 }
+             });
+            
+             if((clickCell.x == emptyCell.x)  && (clickCell.y == emptyCell.y) ){
+               return false;
+             }
+              
+             if( (((clickCell.x-1) == emptyCell.x)  && (clickCell.y == emptyCell.y) ) || 
+                 ((clickCell.x == emptyCell.x)  && ((clickCell.y-1) == emptyCell.y) ) ||
+                 ((clickCell.x == emptyCell.x)  && ((clickCell.y+1) == emptyCell.y) ) ||
+                 (((clickCell.x+1) == emptyCell.x)  && (clickCell.y == emptyCell.y) )){
+                 cells[emptyCellIndex] = {x:emptyCell.x,y:emptyCell.y,val:clickCell.val};
+                 cells[clickCellIndex] = {x:clickCell.x,y:clickCell.y,val:emptyCell.val};
+                 this.setState({cells: cells});
+               }
+           },
+           render: function() {
+             return <div className={this.props.cName}>
+               {this.state.cells.map(function(item){
+               var style = {
+                 backgroundImage:(item.val!='9') ? 'url(p'+item.val+".png)":'', 
+                 backgroundSize:'132px'
+               };
+                 return (<span key={item.x+"."+item.y} className={ 'cell'+item.x+"-"+item.y} onClick={this.handleCellClick.bind(this,item.x,item.y)} style={style}>{item.val}</span>);
+               
+               }.bind(this))}
+               
+             </div>;
+          }
+      });
+    
+
+
+      ReactDOM.render(<ContentBox cName="content-box"/>, document.getElementById('container'));
+    </script>
+  </body>
+</html>
